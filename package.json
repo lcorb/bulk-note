@@ -1,0 +1,17 @@
+{
+  "name": "bulk-note",
+  "version": "1.0.0",
+  "description": "Create OneSchool contact notes in bulk",
+  "main": "index.js",
+  "scripts": {
+    "start": "node --trace-warnings index.js"
+  },
+  "author": "Liam Corbett",
+  "license": "ISC",
+  "dependencies": {
+    "looks-same": "^7.3.0",
+    "prompt-sync": "^4.2.0",
+    "puppeteer": "^10.2.0",
+    "sharp": "^0.28.3"
+  }
+}
