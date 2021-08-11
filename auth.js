@@ -30,21 +30,19 @@ async function findNumbersInKeypad(keypad) {
 
     let map = {};
 
-    const compare = await new Promise((resolve, reject) => {
+    await new Promise((resolve, reject) => {
         try {
             keys.forEach((v) => {
                 for (let i = 0; i < keys.length; i++) {
                     same(`./keypad/Key_${i}.png`, `./keypad/Pos_${v}.png`, (e, same) => {
                         if (e) reject(e);
-                        if (same && same.equal) {
+                        if (same.equal) {
                             // V is positions 1-10
                             // I is numbers 0-9
                             map[i] = v;
                             if (Number(v) === 10) {
                                 resolve();
-                            } 
-                        } else {
-                            reject();
+                            }
                         }
                     })
                 }

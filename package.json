@@ -11,7 +11,7 @@
   "dependencies": {
     "looks-same": "^7.3.0",
     "prompt-sync": "^4.2.0",
-    "puppeteer": "^10.2.0",
+    "puppeteer": "1.19.0",
     "sharp": "^0.28.3"
   }
 }

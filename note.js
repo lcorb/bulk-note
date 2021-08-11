@@ -14,8 +14,13 @@ class Browser {
                 this.browser = await pup.launch({
                     args: ['--no-sandbox'],
                     headless,
-                    slowMo
+                    slowMo,
+                    defaultViewport: null
                 });
+                // // set clipBoard API permissions
+                // const context = this.browser.defaultBrowserContext();
+                // context.clearPermissionOverrides()
+                // context.overridePermissions(config.APPLICATION_URL, ['clipboard-write'])
                 resolve();
             } catch (error) {
                 reject(error);
@@ -36,20 +41,18 @@ class Browser {
 
     async createNotes(note, eqids) {
         return new Promise(async (resolve, reject) => {
-            for (const eqid of eqids) {
-                try {
-                    for (const eqid of eqids) {
-                        await this.createNote(note, eqid);
-                    }
-                } catch (e) {
-                    console.error('Failed to create a note for ' + eqid);
+            try {
+                for (const eqid in eqids) {
+                    await this.createNote(note, eqid, eqids[eqid]);
                 }
+            } catch (e) {
+                console.error('Failed to create a note for ' + eqid);
             }
             resolve();
         })
     }
 
-    async createNote(note, eqid) {
+    async createNote(note, eqid, contactWithCount) {
         return new Promise(async (resolve, reject) => {
             const page = await this.browser.newPage();
             await this.initPage(page);
@@ -58,35 +61,57 @@ class Browser {
             const date = '#a_ocph_ucRecordOfContact_txtContactDt_txtDate';
             const typeSelector = '#a_ocph_ucRecordOfContact_cboContactType';
             const nameButton = '#a_ocph_ucRecordOfContact_txtContactWith_imgClear';
+            const confirmNameButton = '#a_ocph_ucRecordOfContact_txtContactWith_lnkPopup';
             const initiatedSelector = '#a_ocph_ucRecordOfContact_cboDetails';
-            const schoolInitiatedSelector = '#a_ocph_ucRecordOfContact_cboDetails > option:nth-child(2)';
             const detailsSelector = '#a_ocph_ucRecordOfContact_txtNotes';
 
-            await page.click(date);
-            await page.keyboard.down('ControlLeft');
-            await page.keyboard.press('KeyA');
-            await page.keyboard.up('ControlLeft');
-            await page.type(date, note.date);
+            const studentCheckbox = '#a_ocph_ucRecordOfContact_chkStudent';
 
-            await page.select(typeSelector, 'E');
-
+            let parentCheckboxes = [];
+            
             await this.waitAndClick(page, nameButton);
-
             const lName = '#a_ocph_ucRecordOfContact_txtContactWith_txtFamilyName';
             const fName = '#a_ocph_ucRecordOfContact_txtContactWith_txtGivenNames';
+
             
             await page.waitForSelector(lName);
             await page.waitForSelector(fName);
-
-            await page.type(lName, note.lName);
-            await page.type(fName, note.fName);
+            
+            for (let i = 0; i < contactWithCount - 1; i++) {
+                parentCheckboxes.push(`#a_ocph_ucRecordOfContact_rptContactWithGuardians_ctl0${i}_chkGuardian`);
+            };
+            
+            await this.waitAndClick(page, studentCheckbox);
+            
+            parentCheckboxes.forEach(async check => {
+                await this.waitAndClick(page, check);
+            });
+            
+            // await page.click(date);
+            // await page.keyboard.down('ControlLeft');
+            // await page.keyboard.press('KeyA');
+            // await page.keyboard.up('ControlLeft');
+            // await page.type(date, note.date);
+            await this.setInputValue(page, date, note.date);
+            
+            await page.select(typeSelector, 'E');
+            
+            
+            await page.waitForSelector(confirmNameButton);
+            
+            
+            // await page.type(lName, note.lName);
+            // await page.type(fName, note.fName);
+            await this.setInputValue(page, lName, note.lName);
+            await this.setInputValue(page, fName, note.fName);
             
             await page.select(initiatedSelector, 'SC');
             
-            await page.type(detailsSelector, note.details);
-
-            await this.waitAndClick(page, nameButton);
-
+            //await page.type(detailsSelector, note.details);
+            await this.setInputValue(page, detailsSelector, note.details);
+            
+            await this.waitAndClick(page, confirmNameButton);
+            
             resolve();
         })
     }
@@ -94,7 +119,7 @@ class Browser {
     async auth(user, pw , PIN) {
         const pages = await this.browser.pages();
         const page = pages[0];
-        await page.goto('https://oslp.eq.edu.au');
+        await page.goto('https://oslp.eq.edu.au', { waitUntil: 'networkidle0' });
 
         const tryKeyPad = () => {
             return new Promise(async (resolve, reject) => {
@@ -167,33 +192,31 @@ class Browser {
         }
 
         const attemptLogin = async () => {
-            const outcome = await racePromises([
-                page.waitForSelector('#sso-cou', { timeout: 0 }),
-                page.waitForSelector('#a_ocph_ucKeypad_imgKeypad', { timeout: 0 })
-            ]);
-            if (outcome === 0) {    
-                await page.type('#username', user);
-                await page.type('#password', pw);
-        
-                await this.waitAndClick(page, '#sso-cou');
-                await this.waitAndClick(page, '#sso-signin');
-
-                const secondOutcome = await racePromises([
+            return new Promise(async (resolve, reject) => {
+                const outcome = await racePromises([
                     page.waitForSelector('#sso-cou', { timeout: 0 }),
                     page.waitForSelector('#a_ocph_ucKeypad_imgKeypad', { timeout: 0 })
-                ]);
+                ]).catch(r => {});
+                if (outcome === 0) {   
+                    await page.type('#username', user);
+                    await page.type('#password', pw);
+            
+                    await this.waitAndClick(page, '#sso-cou');
+                    await this.waitAndClick(page, '#sso-signin');
+    
+                    const secondOutcome = await racePromises([
+                        page.waitForSelector('#sso-cou', { timeout: 0 }),
+                        page.waitForSelector('#a_ocph_ucKeypad_imgKeypad', { timeout: 0 })
+                    ]).catch(r => {});
 
-                return secondOutcome !== 0;
-            } else {
-                return true;
-            }
+                    resolve(secondOutcome !== 0);
+                } else {
+                    resolve(true);
+                }
+            })
         }
 
-        let login;
-
-        try {
-            login = await attemptLogin();
-        } catch (error) {}
+        const login = await attemptLogin().catch(r => {});
         
         if (!login) {
             console.error('\nFailed entering MIS/Pass! Were these details correct?\nPlease enter manually.');
@@ -205,7 +228,7 @@ class Browser {
             pinPrompt();
         });
 
-        return;
+        return page;
     }
 
     async waitAndClick(page, selector) {
@@ -214,8 +237,14 @@ class Browser {
         return;
     }
 
-    close() {
-        this.browser.close();
+    async setInputValue(page, selector, value) {
+        page.evaluate((data) => {
+            return document.querySelector(data.selector).value = data.value;
+        }, {selector, value})
+    }
+
+    disconnect() {
+        this.browser.disconnect();
     }
 }
 
