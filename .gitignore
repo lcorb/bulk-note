@@ -125,3 +125,5 @@ dist
 *.txt
 Pos_[0-9]*
 KeypadImage.png
+dist
+chromium

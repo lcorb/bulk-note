@@ -4,7 +4,8 @@
   "description": "Create OneSchool contact notes in bulk",
   "main": "index.js",
   "scripts": {
-    "start": "node --trace-warnings index.js"
+    "start": "node --trace-warnings index.js",
+    "build": " pkg . --compress GZIP"
   },
   "author": "Liam Corbett",
   "license": "ISC",
@@ -13,5 +14,13 @@
     "prompt-sync": "^4.2.0",
     "puppeteer": "1.19.0",
     "sharp": "^0.28.3"
+  },
+  "pkg": {
+    "assets": [ "node_modules/sharp/build/Release", "node_modules/sharp/vendor/lib" ],
+    "targets": [ "node14-win-x64" ],
+    "outputPath": "dist"
+  },
+  "bin": {
+    "path": "./index.js"
   }
 }

@@ -15,7 +15,8 @@ class Browser {
                     args: ['--no-sandbox'],
                     headless,
                     slowMo,
-                    defaultViewport: null
+                    defaultViewport: null,
+                    executablePath: './chromium/win64-674921/chrome-win/chrome.exe'
                 });
                 // // set clipBoard API permissions
                 // const context = this.browser.defaultBrowserContext();
