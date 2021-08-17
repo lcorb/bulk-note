@@ -44,14 +44,16 @@ def makeform(window, fields):
         row = tk.Frame(window, bg='slate gray', bd=2)
         lab = tk.Label(row, width=32, text=field['label'] + ": ", anchor='w', fg='white', bg='slate gray')
         if field['large']:
-            ent = sb.ScrolledText(row, height=10, fg='white', bg='gray24', width=32, insertbackground='white')
+            ent = sb.ScrolledText(row, height=10, fg='white', bg='gray24', width=32, insertbackground='white', relief=tk.GROOVE)
             # scroll = tk.Scrollbar(ent)
             # scroll.pack( side = tk.RIGHT, fill = tk.Y )
             # scroll.config( command = ent.yview )
             # ent['yscrollcommand'] = scroll.set
         else:
             ent = tk.Entry(row, fg='white', bg='gray24', 
-        show='*' if field['protected'] else '', width=32, insertbackground='white')
+            show='*' if field['protected'] else '', width=32, insertbackground='white')
+            if first:
+                ent.focus_set()
         row.pack(side = tk.TOP, fill = tk.X, padx = 5 , pady = 5)
         lab.pack(side = tk.LEFT)
         ent.pack(side = tk.RIGHT, expand = True, fill = tk.X)
