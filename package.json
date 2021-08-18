@@ -17,8 +17,13 @@
     "sharp": "^0.28.3"
   },
   "pkg": {
-    "assets": [ "node_modules/sharp/build/Release", "node_modules/sharp/vendor/lib" ],
-    "targets": [ "node14-win-x64" ],
+    "assets": [
+      "node_modules/sharp/build/Release",
+      "node_modules/sharp/vendor/lib"
+    ],
+    "targets": [
+      "node14-win-x64"
+    ],
     "outputPath": "dist"
   },
   "bin": {
