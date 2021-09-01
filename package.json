@@ -6,12 +6,14 @@
   "scripts": {
     "start": "node --trace-warnings index.js",
     "build": " pkg . --compress GZIP",
-    "gui": "python menu.py"
+    "gui": "python menu.py",
+    "build_gui": "python ./pyinstaller/pyinstaller.py --onefile --noconsole menu.py"
   },
   "author": "Liam Corbett",
   "license": "ISC",
   "dependencies": {
     "looks-same": "^7.3.0",
+    "node-hide-console-window": "^2.1.0",
     "prompt-sync": "^4.2.0",
     "puppeteer": "1.19.0",
     "sharp": "^0.28.3"

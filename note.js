@@ -55,6 +55,7 @@ class Browser {
 
     async createNote(note, eqid, contactWithCount) {
         return new Promise(async (resolve, reject) => {
+            console.log('Creating page..')
             const page = await this.browser.newPage();
             await this.initPage(page);
             await page.goto(`https://oslp.eq.edu.au/OSLP/student/MaintainContact.aspx?EQId=${eqid}`);
@@ -87,6 +88,10 @@ class Browser {
             parentCheckboxes.forEach(async check => {
                 await this.waitAndClick(page, check);
             });
+
+            if (note.unaware) {
+                await this.waitAndClick(page, '#a_ocph_ucRecordOfContact_chkParentUnaware');
+            }
             
             // await page.click(date);
             // await page.keyboard.down('ControlLeft');

@@ -3,49 +3,24 @@ const fs = require('fs');
 const { re, complete } = require('./extract');
 const { Browser } = require('./note');
 
-process.argv.forEach((val, index) => {
-    console.log(`${index}: ${val}`);
-});
+const ConsoleWindow = require("node-hide-console-window");
+ConsoleWindow.hideConsole();
 
-async function main () {
-    // const detailsFiles = fs.readdirSync('./data/details');
-    // const eqidFiles = fs.readdirSync('./data/eqids');
-    // if (!detailsFiles.length || !eqidFiles.length) {
-    //     console.error(`No files found in one of the data folders!\nExiting...`);
-    // } else {
-    //     const fName = prompt('Enter staff first name: ');
-    //     const lName = prompt('Enter staff last name: ');
-    //     const user = prompt('Enter your MIS ID: ');
-    //     const pw = prompt('Enter your password: ', { echo: '*' });
-    //     let PIN = prompt('Enter your OneSchool PIN: ', { echo: '*' });
-
-    //     PIN = PIN.split('');
-    
-    //     const date = prompt('Enter the date of contact (dd-mm): ');
-
-    //     const details = getDetailFile(detailsFiles).toString();
-    //     const eqidsToParse = [...getEQIDsFile(eqidFiles).toString().matchAll(re)];
-        
-    //     // let eqids = eqidsToParse.map(v => v[0]);
-
-    //     let unique_eqids = {}
-        
-    //     eqidsToParse.forEach(v => {
-    //         unique_eqids[v[0]] ? unique_eqids[v[0]] +=1 : unique_eqids[v[0]] = 1;
-    //     });
-
+async function main () {    
     const fName = process.argv[2];
     const lName = process.argv[3];
     const user = process.argv[4];
     const pw = process.argv[5];
     const PIN = process.argv[6].split('');
-    const date = process.argv[7]
-    const eqids = process.argv[8];
-    const details = process.argv[9];
+    const date = process.argv[7];
+    const parentUnaware = process.argv[8];
+    const eqids = process.argv[9];
+    const details = process.argv[10];
 
     let unique_eqids = {}
-    
-    eqids.forEach(v => {
+    const eqidsToParse = [...eqids.matchAll(re)];
+
+    eqidsToParse.forEach(v => {
         unique_eqids[v[0]] ? unique_eqids[v[0]] +=1 : unique_eqids[v[0]] = 1;
     });
 
@@ -54,6 +29,7 @@ async function main () {
     const authPage = await browser.auth(user, pw, PIN);
     await browser.createNotes({
         'date': date,
+        'unaware': parentUnaware,
         'fName': fName,
         'lName': lName,
         'details': details
@@ -64,7 +40,6 @@ async function main () {
 
     console.log('Contact notes are ready to save!');
     console.log('Close the browser when finished.');
-    
 }
 
 function getDetailFile(files) {
@@ -95,8 +70,7 @@ function getEQIDsFile(files) {
     }
 }
 
-//main();
-
+main();
 
 // get details
 // parse list
