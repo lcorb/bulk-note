@@ -128,3 +128,8 @@ KeypadImage.png
 dist
 chromium
 theme
+__pycache__
+build
+pyinstaller
+menu.spec
+menu.exe

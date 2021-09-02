@@ -9,13 +9,13 @@ ConsoleWindow.hideConsole();
 async function main () {    
     const fName = process.argv[2];
     const lName = process.argv[3];
-    const user = process.argv[4];
-    const pw = process.argv[5];
-    const PIN = process.argv[6].split('');
-    const date = process.argv[7];
-    const parentUnaware = process.argv[8];
-    const eqids = process.argv[9];
-    const details = process.argv[10];
+    const user = '';
+    const pw = '';
+    const PIN = process.argv[4].split('');
+    const date = process.argv[5];
+    const parentUnaware = Number(process.argv[6]);
+    const eqids = process.argv[7];
+    const details = process.argv[8];
 
     let unique_eqids = {}
     const eqidsToParse = [...eqids.matchAll(re)];

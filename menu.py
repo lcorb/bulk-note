@@ -1,5 +1,7 @@
 import subprocess
+import threading
 import tkinter as tk
+from tkinter.constants import DISABLED, NORMAL
 import tkinter.scrolledtext as sb
 from tkinter import Widget, ttk
 fields = (
@@ -15,18 +17,18 @@ fields = (
         'large': False,
         'special': ''
     },
-    {
-        'label' : 'Your MIS ID',
-        'protected': False,
-        'large': False,
-        'special': ''
-    },
-    {
-        'label' : 'Your password',
-        'protected': True,
-        'large': False,
-        'special': ''
-    },
+    # {
+    #     'label' : 'Your MIS ID',
+    #     'protected': False,
+    #     'large': False,
+    #     'special': ''
+    # },
+    # {
+    #     'label' : 'Your password',
+    #     'protected': True,
+    #     'large': False,
+    #     'special': ''
+    # },
     {
         'label' : 'Your OneSchool PIN',
         'protected': True,
@@ -64,6 +66,20 @@ fields = (
         'special': ''
     }
 )
+
+class BaseThread(threading.Thread):
+    def __init__(self, thread_args=None, callback=None, callback_args=None, *args, **kwargs):
+        target = kwargs.pop('target')
+        super(BaseThread, self).__init__(target=self.target_with_callback, *args, **kwargs)
+        self.callback = callback
+        self.method = target
+        self.args = thread_args
+        self.callback_args = callback_args
+
+    def target_with_callback(self):
+        self.method(self.args)
+        if self.callback is not None:
+            self.callback(self.callback_args)
 
 def horizonal_rule(frame):
     sep = ttk.Separator(frame, orient='horizontal')
@@ -104,13 +120,32 @@ def make_form(window, fields):
         ent.pack(side = tk.RIGHT, expand = True, fill = tk.X)
     return entries
 
-def create_notes(button, entries):
+def revert_button(button):
+    button['state'] = NORMAL 
+    button['text'] = 'Create Contact Notes!'
+    button.pack()
+
+def create_notes(window, button, entries):
+    button['state'] = DISABLED
+    button['text'] = '    Please wait...   '
+    button.pack()
     cmd = ['./dist/bulk-note.exe']
     for entry in entries:
         cmd.append(f'{entry[1](entry[0])}')
 
-    subprocess.run(cmd)
+    # threading.Thread(target=subprocess.run, args=[cmd]).start()
 
+    BaseThread(
+        target=subprocess.run,
+        thread_args=cmd,
+        callback=revert_button,
+        callback_args=(button)
+    ).start()
+    
+    # button['state'] = DISABLED
+    # button['text'] = 'Create Contact Notes!'
+    # button['style'] = 'Accent.TButton'
+    # button.pack()
 
 if __name__ == '__main__':
     window = tk.Tk()
@@ -133,6 +168,6 @@ if __name__ == '__main__':
     # bg = tk.Frame(master=window, width=200, height=100, bg='gray')
     # bg.pack(fill=tk.BOTH, side=tk.LEFT, expand=True)
     # window.bind('<Return>', (lambda: create_notes(entries)))
-    b1 = ttk.Button(window, text = 'Create Contact Notes!', style='Accent.TButton', command = (lambda: create_notes(b1, entries)))
+    b1 = ttk.Button(window, text = 'Create Contact Notes!', style='Accent.TButton', command = (lambda: create_notes(window, b1, entries)))
     b1.pack(side = tk.BOTTOM, padx = 5, pady = 15)
     window.mainloop()
