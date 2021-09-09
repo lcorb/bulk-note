@@ -1,7 +1,13 @@
 const same = require('looks-same');
 const sharp = require('sharp');
+const fs = require('fs');
 
 const size = [50, 43]
+
+const randomNumbers = Math.floor(Math.random() * 1000);
+const currentTime = Date.now();
+
+const folder = `${currentTime}-${randomNumbers}`;
 
 const locations = {
     1: [15, 10],
@@ -25,7 +31,7 @@ async function findNumbersInKeypad(keypad) {
             top: locations[v][1],
             width: size[0],
             height: size[1]})
-        .toFile(`./keypad/Pos_${v}.png`)
+        .toFile(`./keypad/${folder}/Pos_${v}.png`)
     })
 
     let map = {};
@@ -34,7 +40,7 @@ async function findNumbersInKeypad(keypad) {
         try {
             keys.forEach((v) => {
                 for (let i = 0; i < keys.length; i++) {
-                    same(`./keypad/Key_${i}.png`, `./keypad/Pos_${v}.png`, (e, same) => {
+                    same(`./keypad/Key_${i}.png`, `./keypad/${folder}/Pos_${v}.png`, (e, same) => {
                         if (e) reject(e);
                         if (same.equal) {
                             // V is positions 1-10
@@ -51,6 +57,8 @@ async function findNumbersInKeypad(keypad) {
             reject(e)
         }
     }).catch(e => { throw (e) });
+
+    fs.unlink(`./keypad/${folder}/`);
     return map;
 }
 
