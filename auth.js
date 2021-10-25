@@ -9,6 +9,7 @@ const currentTime = Date.now();
 
 const folder = `${currentTime}-${randomNumbers}`;
 
+
 const locations = {
     1: [15, 10],
     2: [75, 10],
@@ -23,6 +24,7 @@ const locations = {
 }
 
 async function findNumbersInKeypad(keypad) {
+    fs.mkdirSync(`./keypad/${folder}`);
     const keys = Object.keys(locations);
     keys.forEach((v) => {
         sharp(keypad)
@@ -58,7 +60,7 @@ async function findNumbersInKeypad(keypad) {
         }
     }).catch(e => { throw (e) });
 
-    fs.unlink(`./keypad/${folder}/`);
+    fs.rmdirSync(`./keypad/${folder}`, { recursive: true });
     return map;
 }
 

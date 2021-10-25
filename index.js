@@ -13,9 +13,11 @@ async function main () {
     const pw = '';
     const PIN = process.argv[4].split('');
     const date = process.argv[5];
-    const parentUnaware = Number(process.argv[6]);
-    const eqids = process.argv[7];
-    const details = process.argv[8];
+    const studentContacted = Number(process.argv[6]);
+    const parentUnaware = Number(process.argv[7]);
+    const eqids = process.argv[8];
+    const details = process.argv[9];
+    const filename = process.argv[10];
 
     let unique_eqids = {}
     const eqidsToParse = [...eqids.matchAll(re)];
@@ -30,9 +32,11 @@ async function main () {
     await browser.createNotes({
         'date': date,
         'unaware': parentUnaware,
+        'studentContacted': studentContacted,
         'fName': fName,
         'lName': lName,
-        'details': details
+        'details': details,
+        'filename': filename
     }, unique_eqids);
 
     // await authPage.close();

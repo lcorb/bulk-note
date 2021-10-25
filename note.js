@@ -67,23 +67,28 @@ class Browser {
             const initiatedSelector = '#a_ocph_ucRecordOfContact_cboDetails';
             const detailsSelector = '#a_ocph_ucRecordOfContact_txtNotes';
 
-            const studentCheckbox = '#a_ocph_ucRecordOfContact_chkStudent';
-
+            
             let parentCheckboxes = [];
             
             await this.waitAndClick(page, nameButton);
             const lName = '#a_ocph_ucRecordOfContact_txtContactWith_txtFamilyName';
             const fName = '#a_ocph_ucRecordOfContact_txtContactWith_txtGivenNames';
-
+            
             
             await page.waitForSelector(lName);
             await page.waitForSelector(fName);
+
+            contactWithCount++;
+            if (note.studentContacted) {
+                const studentCheckbox = '#a_ocph_ucRecordOfContact_chkStudent';
+                await this.waitAndClick(page, studentCheckbox);
+                contactWithCount--;
+            }
             
             for (let i = 0; i < contactWithCount - 1; i++) {
                 parentCheckboxes.push(`#a_ocph_ucRecordOfContact_rptContactWithGuardians_ctl0${i}_chkGuardian`);
             };
             
-            await this.waitAndClick(page, studentCheckbox);
             
             parentCheckboxes.forEach(async check => {
                 await this.waitAndClick(page, check);
@@ -117,6 +122,22 @@ class Browser {
             await this.setInputValue(page, detailsSelector, note.details);
             
             await this.waitAndClick(page, confirmNameButton);
+
+
+            if (note.filename) {
+                const addAttachment = '#a_ocph_ucRecordOfContact_ucAttachments_grdResults_ctl01_ucFooterButton_pnlPostBack';
+                await this.waitAndClick(page, addAttachment);
+                
+                await page.waitForSelector('#a_ocph_ucRecordOfContact_ucAttachments_grdResults_ctl01_ifmUpload');
+                const ifr = await page.$('#a_ocph_ucRecordOfContact_ucAttachments_grdResults_ctl01_ifmUpload');
+                const frame = await ifr.contentFrame();
+                await frame.waitForSelector('#filAttachment');
+                const attachmentUpload = await frame.$('#filAttachment');
+                await attachmentUpload.uploadFile(note.filename);
+    
+                const uploadButton = '#lnkUpload';
+                await this.waitAndClick(frame, uploadButton);
+            }
             
             resolve();
         })
